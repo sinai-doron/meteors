@@ -58,45 +58,45 @@ export class AppService {
   }
 
   getMeteorsByYear(year: string, mass?: string): PagedResponse {
-    let y = parseInt(year);
-    if (!year || year.toLowerCase() === 'unknown') {
-      y = undefined;
-    } else if (isNaN(y) && year.toLowerCase() !== 'unknown') {
-      return emptyResponse;
-    }
-
-    if (!mass) {
-      const data = this.meteorDb.filter((m) => m.year === y);
-      return this.sliceResponse(data, '1');
-    } else {
-      let parsedMass: number = parseFloat(mass);
-      if (isNaN(parsedMass)) {
-        parsedMass = 0;
-      }
-
-      const filteredMeteors = this.meteorDb.filter(
-        (meteor) => meteor.year === y && meteor.mass > parsedMass,
-      );
-
-      if (filteredMeteors.length === 0) {
-        const yearWithMatchingMeteor = this.meteorDb.find(
-          (m) => m.mass > parsedMass,
-        );
-
-        if (yearWithMatchingMeteor) {
-          const data = this.meteorDb.filter(
-            (meteor) =>
-              meteor.year === yearWithMatchingMeteor.year &&
-              meteor.mass > parsedMass,
-          );
-          return this.sliceResponse(data, '1');
-        } else {
-          // No meteors at all with the given mass
-          return emptyResponse;
+    // Handle 'year' argument
+    let y: number | undefined;
+    if (year && year.toLowerCase() !== 'unknown') {
+        y = parseInt(year);
+        if (isNaN(y)) {
+            return emptyResponse;
         }
-      }
-
-      return this.sliceResponse(filteredMeteors, '1');
     }
-  }
+
+    // Handle 'mass' argument
+    let parsedMass = 0;
+    if (mass) {
+        parsedMass = parseFloat(mass);
+        if (isNaN(parsedMass)) {
+            return emptyResponse;
+        }
+    }
+
+    // Filter meteors based on year and mass
+    const filteredMeteors = this.meteorDb.filter((meteor) => {
+        const yearMatches = meteor.year === y;
+        const massMatches = meteor.mass > parsedMass;
+        return yearMatches && massMatches;
+    });
+
+    // If no meteors found and mass was provided, try finding any year with the given mass
+    if (filteredMeteors.length === 0 && mass) {
+        const yearWithMatchingMeteor = this.meteorDb.find((m) => m.mass > parsedMass);
+        if (yearWithMatchingMeteor) {
+            return this.sliceResponse(
+                this.meteorDb.filter((meteor) => meteor.year === yearWithMatchingMeteor.year && meteor.mass > parsedMass),
+                '1'
+            );
+        } else {
+            return emptyResponse;
+        }
+    }
+
+    return this.sliceResponse(filteredMeteors, '1');
+}
+
 }
