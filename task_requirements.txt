@@ -1,0 +1,29 @@
+Build a full stack app that helps our user to complete the following flow:
+
+The user can start the investigation by YEAR.
+The user will see the total number of meteors landed in the selected year (visualize it in any way you'd like, or just simple text - your call).
+The user can now filter by larger than MASS in free text.
+If the user cannot find a meteor with the given size, the filter resets the year to a year where there is a meteor that fits the query.
+The user should see a message explaining why the filter was changed.
+ 
+
+Requirements:
+
+v - The dataset should be stored and queried on the server.
+v - Query results should be paged.
+v - Query results should be cached.
+v - The list of meteors should be a virtualized list with infinite scrolling.
+ 
+
+Example: 
+
+Note: this example assumes you are not sorting the dataset.
+
+ 
+
+The user selects 1984 in the year box
+The page shows 7 meteors
+The user filters by 1000 mass
+The page shows 4 meteors
+The user filters by 100000
+The view jumps to the year 1952 and shows 1 meteor
