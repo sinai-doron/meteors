@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import Meteor from './interfaces/Meteor';
 import { CACHE_MANAGER } from './cache.constants';
 import PagedResponse from './interfaces/PagedResponse';
-import { parse } from 'path';
 
 const emptyResponse: PagedResponse = {
   meteors: [],
@@ -23,24 +22,43 @@ export class AppService {
   }
 
   sliceResponse(data: Array<Meteor>, page: string): PagedResponse {
+    // Validate data array
+    if (!Array.isArray(data)) {
+        throw new Error('Invalid data provided.');
+    }
+
+    // Validate page string
+    if (typeof page !== 'string' || page.trim() === '') {
+        throw new Error('Invalid page number provided.');
+    }
+
     let pageNumber: number = parseInt(page);
     if (isNaN(pageNumber) || pageNumber < 1) {
-      pageNumber = 1;
+        throw new Error('Page number must be a positive integer.');
     }
+
+    // Validate limit (assuming it's defined elsewhere in the class)
+    if (this.limit <= 0) {
+        throw new Error('Invalid limit.');
+    }
+
     const totalPages = Math.ceil(data.length / this.limit);
     if (pageNumber > totalPages) {
-      pageNumber = totalPages;
+        pageNumber = totalPages || 1;
     }
+
     const startIndex = (pageNumber - 1) * this.limit;
-    const endIndex = startIndex + this.limit;
+    const endIndex = Math.min(data.length, startIndex + this.limit);
     const filteredMeteors = data.slice(startIndex, endIndex);
+
     return {
-      meteors: filteredMeteors,
-      totalPages,
-      pageNumber,
-      totalElements: data.length
+        meteors: filteredMeteors,
+        totalPages,
+        pageNumber,
+        totalElements: data.length
     };
-  }
+}
+
 
   getAllMeteors(page: string): PagedResponse {
     return this.sliceResponse(this.meteorDb, page);
