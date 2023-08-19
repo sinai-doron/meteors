@@ -52,7 +52,7 @@ Given our primary assumption and the choice against a relational DB, pagination 
 $ npm install
 ```
 
-## Running the App
+## Running the App Locally
 
 ```bash
 # development
@@ -63,6 +63,16 @@ $ npm run start:dev
 
 # production mode
 $ npm run start:prod
+```
+
+## Running the App Docker
+
+```bash
+# build the container
+$ docker build -t meteor-server .
+
+# run the container
+$ docker run -p 3001:3001 meteor-server
 ```
 
 ## Testing
